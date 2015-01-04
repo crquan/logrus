@@ -70,7 +70,9 @@ func (f *TextFormatter) Format(entry *Entry) ([]byte, error) {
 	}
 
 	b.WriteByte('\n')
-	return b.Bytes(), nil
+
+	// slice out the leading space
+	return b.Bytes()[1:], nil
 }
 
 func printColored(b io.Writer, entry *Entry, keys []string) {
@@ -86,7 +88,7 @@ func printColored(b io.Writer, entry *Entry, keys []string) {
 
 	levelText := strings.ToUpper(entry.Level.String())[0:4]
 
-	fmt.Fprintf(b, "\x1b[%dm%s\x1b[0m[%04d] %-44s ", levelColor, levelText, miniTS(), entry.Message)
+	fmt.Fprintf(b, " \x1b[%dm%s\x1b[0m[%04d] %-44s", levelColor, levelText, miniTS(), entry.Message)
 	for _, k := range keys {
 		v := entry.Data[k]
 		fmt.Fprintf(b, " \x1b[%dm%s\x1b[0m=%v", levelColor, k, v)
@@ -112,12 +114,12 @@ func printKeyValue(b io.Writer, key, value interface{}) {
 	case error:
 		value = value.(error).Error()
 	default:
-		fmt.Fprintf(b, "%v=%v ", key, value)
+		fmt.Fprintf(b, " %v=%v", key, value)
 	}
 
 	if needsQuoting(value.(string)) {
-		fmt.Fprintf(b, "%v=%s ", key, value)
+		fmt.Fprintf(b, " %v=%s", key, value)
 	} else {
-		fmt.Fprintf(b, "%v=%q ", key, value)
+		fmt.Fprintf(b, " %v=%q", key, value)
 	}
 }
