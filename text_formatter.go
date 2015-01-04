@@ -108,18 +108,16 @@ func needsQuoting(text string) bool {
 func printKeyValue(b io.Writer, key, value interface{}) {
 	switch value.(type) {
 	case string:
-		if needsQuoting(value.(string)) {
-			fmt.Fprintf(b, "%v=%s ", key, value)
-		} else {
-			fmt.Fprintf(b, "%v=%q ", key, value)
-		}
+		break
 	case error:
-		if needsQuoting(value.(error).Error()) {
-			fmt.Fprintf(b, "%v=%s ", key, value)
-		} else {
-			fmt.Fprintf(b, "%v=%q ", key, value)
-		}
+		value = value.(error).Error()
 	default:
 		fmt.Fprintf(b, "%v=%v ", key, value)
+	}
+
+	if needsQuoting(value.(string)) {
+		fmt.Fprintf(b, "%v=%s ", key, value)
+	} else {
+		fmt.Fprintf(b, "%v=%q ", key, value)
 	}
 }
