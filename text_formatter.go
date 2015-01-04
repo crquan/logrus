@@ -3,6 +3,7 @@ package logrus
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"regexp"
 	"sort"
 	"strings"
@@ -59,12 +60,12 @@ func (f *TextFormatter) Format(entry *Entry) ([]byte, error) {
 		printColored(b, entry, keys)
 	} else {
 		if !f.DisableTimestamp {
-			f.appendKeyValue(b, "time", entry.Time.Format(time.RFC3339))
+			printKeyValue(b, "time", entry.Time.Format(time.RFC3339))
 		}
-		f.appendKeyValue(b, "level", entry.Level.String())
-		f.appendKeyValue(b, "msg", entry.Message)
+		printKeyValue(b, "level", entry.Level.String())
+		printKeyValue(b, "msg", entry.Message)
 		for _, key := range keys {
-			f.appendKeyValue(b, key, entry.Data[key])
+			printKeyValue(b, key, entry.Data[key])
 		}
 	}
 
@@ -72,7 +73,7 @@ func (f *TextFormatter) Format(entry *Entry) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-func printColored(b *bytes.Buffer, entry *Entry, keys []string) {
+func printColored(b io.Writer, entry *Entry, keys []string) {
 	var levelColor int
 	switch entry.Level {
 	case WarnLevel:
@@ -104,7 +105,7 @@ func needsQuoting(text string) bool {
 	return true
 }
 
-func (f *TextFormatter) appendKeyValue(b *bytes.Buffer, key, value interface{}) {
+func printKeyValue(b io.Writer, key, value interface{}) {
 	switch value.(type) {
 	case string:
 		if needsQuoting(value.(string)) {
